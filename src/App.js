@@ -8,9 +8,9 @@ export const ACTIONS = {
   CHOOSE_OPERATION: 'choose-operation',
   CLEAR: 'clear',
   DELETE_DIGIT: 'delete-digit',
-  EVALUATE: 'evaluate'
+  EVALUATE: 'evaluate',
 
-};
+}
 
 
 
@@ -32,23 +32,59 @@ function reducer(state,{ type, payload }){
         if (state.currentOperand == null && state.previousOperand == null){
           return state
         }
-
-        if (state.previousOPerand == null){
+        if (state.currentOperand == null){
           return{
             ...state,
-            operation: payload.operation,
-            previousOPerand: state.currentOperand,
-            currentOperand: null,
+            operation:payload.operation,
           }
         }
 
+        // if (state.currentOperand == null)
+
+        if (state.previousOperand == null){
+          return{
+            ...state,
+            operation: payload.operation,
+            previousOperand: state.currentOperand,
+            currentOperand: null,
+          }
+        }
+        return {
+          ...state,
+          previousOperand: evaluate(state),
+          operation: payload.operation,
+          currentOperand: null,
+        }
       case ACTIONS.CLEAR:
         return{}
     }
 }
 
+function evaluate({ currentOperand, previousOperand, operation }) {
+  const prev = parseFloat(previousOperand)
+  const current = parseFloat(currentOperand)
+  if (isNaN(prev) || isNaN(current)) return ""
+  let computation = ""
+  switch (operation) {
+    case "+":
+      computation = prev + current
+      break
+    case "-":
+      computation = prev - current
+      break
+    case "*":
+      computation = prev * current
+      break
+    case "/":
+      computation = prev / current
+      break
+  }
+
+  return computation.toString()
+}
+
 function App() {
-  const [{currentOperand, previousOPerand, operation}, dispatch] = useReducer(
+  const [{currentOperand, previousOperand, operation}, dispatch] = useReducer(
     reducer,
     {}
   )
@@ -57,7 +93,7 @@ function App() {
   return (
     <div className="calculator-grid">
       <div className="output">
-        <div className="previous-operand">{previousOPerand} {operation}</div>
+        <div className="previous-operand">{previousOperand} {operation}</div>
         <div className="current-operand">{currentOperand}</div>
       </div>
       <button className="span-two"  onClick={() => dispatch({ type: ACTIONS.CLEAR })}>AC</button>
